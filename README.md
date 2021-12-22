@@ -1,11 +1,11 @@
-# parcel-pixijs-quickstarter
-Example App using pixiJS and Typescript bundled with parcel 🚀🔥.
+# ViDraw
+
+Vi, but for graphics. Keyboard-first, efficient & pretty.
 
 ### Highlights
-- ⚡️  Super fast start
-- 🔥  Hot module replacement.
-- 📝  Typescript.
-- 👮  Unit testing.
+- ⚡️  Modal editing
+- 🔥  Pretty by default
+- 📝  Auto-panning & cropping 
 
 ### Quick start
 **Node version >= 8.0 (recommended 10.6.0) and NPM >= 5 (recommended 6.1.0)**
