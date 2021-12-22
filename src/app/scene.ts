@@ -1,5 +1,6 @@
-﻿import {Container, Graphics} from "pixi.js";
-import {Box, Cursor} from "./shapes/shapes";
+﻿import {Container, Graphics, DisplayObject} from "pixi.js";
+import {Cursor} from "./shapes/shapes";
+
 
 export class Scene extends Container {
 
@@ -13,9 +14,35 @@ export class Scene extends Container {
         this.screenHeight = screenHeight;
 
         this.sortableChildren = true;
-        this.cursorElement = new Cursor(this.screenWidth/2, this.screenHeight/2)
+        this.cursorElement = new Cursor(
+            (this.screenWidth/2)-((this.screenWidth/2)%20),
+            (this.screenHeight/2)-((this.screenHeight/2)%20))
         this.cursorElement.zIndex = 99;
 
         this.addChild(this.cursorElement);
+
+        var grid = new Graphics();
+        grid.lineStyle(0, 0x0000FF, 1);
+        grid.beginFill(0x666666, 1);
+        for (let x = 0; x < screenWidth; x+=20) {
+            for (let y = 0; y < screenWidth; y+=20) {
+                grid.drawRect(x, y, 1, 1);
+            }
+        }
+        this.addChild(grid);
+    }
+
+    public findShapeAtCursor(): DisplayObject {
+        const values = this.children;
+        const res = []
+        for (let i = this.children.length - 1; i >= 0; i--) {
+            const displayObject = this.children[i];
+            if (('selected' in displayObject) &&
+                (displayObject as DisplayObject).getBounds().contains(this.cursorElement.x, this.cursorElement.y)) {
+                return displayObject;
+            }
+        }
+
+        return null;
     }
 }

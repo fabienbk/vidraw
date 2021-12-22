@@ -12,7 +12,8 @@
   "author": "Llorenç Pujol Ferriol",
   "license": "MIT",
   "dependencies": {
-    "pixi.js": "~5.3.3"
+    "pixi.js": "~6.0.4",
+    "pixi-dashed-line": "^1.0.0"
   },
   "devDependencies": {
     "@types/jest": "~26.0.15",

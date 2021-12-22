@@ -1,5 +1,5 @@
 ﻿import {Scene} from "./scene";
-import {Command, InsertCommand, MoveCursorCommand} from "./commands/commands";
+import {Command, InsertCommand, MoveCursorCommand, SelectCommand} from "./commands/commands";
 
 type CommandToken = string;
 
@@ -7,6 +7,7 @@ export class CommandManager {
 
     private commands: {[k: string]: Command} = {
         'i': new InsertCommand(),
+        's': new SelectCommand(),
         'h': new MoveCursorCommand(-20, 0),
         'j': new MoveCursorCommand(0, 20),
         'k': new MoveCursorCommand(0, -20),
@@ -26,17 +27,7 @@ export class CommandManager {
         console.log(keyEvent);
         switch (keyEvent.key) {
             case 'Escape':
-                this.clear();
-            case 'i':
-            case 'h':
-            case 'j':
-            case 'k':
-            case 'l':
-            {
-                this.buffer.push(keyEvent.key as CommandToken);
-                this.interpret();
-                break;
-            }
+                this.clear();break;
             case '0':
             case '1':
             case '2':
@@ -48,6 +39,12 @@ export class CommandManager {
             case '8':
             case '9':
                 this.buffer.push(keyEvent.key as CommandToken);break;
+            default:
+            {
+                this.buffer.push(keyEvent.key as CommandToken);
+                this.interpret();
+                break;
+            }
         }
     }
 

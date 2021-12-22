@@ -1,5 +1,5 @@
 ﻿import {Scene} from "../scene";
-import {Box} from "../shapes/shapes";
+import {Box, Refreshable, Selectable} from "../shapes/shapes";
 
 export abstract class Command {
     abstract execute(scene: Scene);
@@ -8,6 +8,16 @@ export abstract class Command {
 export class InsertCommand extends Command{
     execute(scene: Scene) {
         scene.addChild(new Box(scene.cursorElement.x,scene.cursorElement.y, 200, 80))
+    }
+}
+
+export class SelectCommand extends Command {
+    execute(scene: Scene) {
+        const shape = scene.findShapeAtCursor();
+        if ('selected' in shape) {
+            (shape as Selectable).selected = !(shape as Selectable).selected;
+            (shape as Refreshable).draw();
+        }
     }
 }
 
