@@ -1,36 +1,17 @@
-﻿import { Graphics } from "pixi.js";
-import { DashLine } from 'pixi-dashed-line/lib/index'
+﻿import {Graphics} from "pixi.js";
+import {DashLine} from 'pixi-dashed-line/lib/index'
 
-export interface Selectable {
-    selected: boolean;
-}
-
-export interface Refreshable {
-    draw();
-}
-
-export class Cursor extends Graphics implements Refreshable {
-    constructor(public x: number,
-                public y: number) {
+export abstract class SceneObject extends Graphics {
+    static idGenerator = 0;
+    public id = SceneObject.idGenerator++;
+    public selected = false;
+    protected constructor() {
         super();
-        this.draw();
     }
-
-    public draw() {
-        this.clear();
-        this.lineStyle(3, 0x000000);
-        this.moveTo(0, 0)
-            .lineTo(15, 0)
-            .moveTo(0, 0)
-            .lineTo(-15, 0)
-            .moveTo(0, 0)
-            .lineTo(0, 15)
-            .moveTo(0, 0)
-            .lineTo(0, -15);
-    }
+    public abstract draw();
 }
 
-export class Box extends Graphics implements Refreshable, Selectable {
+export class Box extends SceneObject {
     selected = false;
 
     constructor(public x: number,

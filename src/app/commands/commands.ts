@@ -1,43 +1,44 @@
-﻿import {Scene} from "../scene";
-import {Box, Refreshable, Selectable} from "../shapes/shapes";
+﻿import {Box, SceneObject} from "../shapes/scene-objects";
+import {CommandManager} from "../commandManager";
 
 export abstract class Command {
     public transient = false;
-    abstract execute(scene: Scene);
-    abstract undo(scene: Scene);
+    abstract execute(commandManager: CommandManager);
+    abstract undo(commandManager: CommandManager);
 }
 
 export class InsertCommand extends Command{
-    private id: number;
-    execute(scene: Scene) {
-        var shape = scene.findSelectableShapeAtCursor();
-        if (!shape) {
-            var box = new Box(scene.cursorElement.x,scene.cursorElement.y, 200, 80);
-            scene.addChild(box)
+    private newShape: SceneObject;
+    execute(commandManager: CommandManager) {
+        const scene = commandManager.scene;
+        const existingSceneObject = scene.findSceneObjectAtCursor();
+        if (!existingSceneObject) {
+            const box = new Box(scene.cursorElement.x, scene.cursorElement.y, 200, 80);
+            this.newShape = box;
+            scene.addChild(box);
         }
     }
 
-    undo(scene: Scene) {
-
+    undo(commandManager: CommandManager) {
+        commandManager.scene.removeChild(this.newShape);
     }
 }
 
 export class SelectCommand extends Command {
-    private selectable: Selectable;
-    private refreshable: Refreshable;
-    execute(scene: Scene) {
-        const shape = scene.findSelectableShapeAtCursor();
-        if ('selected' in shape) {
-            this.selectable = shape as Selectable;
-            this.refreshable = shape as Refreshable;
-            this.selectable.selected = !this.selectable.selected;
-            this.refreshable.draw();
+    private sceneObject: SceneObject;
+    execute(commandManager: CommandManager) {
+        this.sceneObject = commandManager.scene.findSceneObjectAtCursor();
+        if (this.sceneObject) {
+            this.sceneObject.selected = !this.sceneObject.selected;
+            this.sceneObject.draw();
         }
     }
 
-    undo(scene: Scene) {
-        this.selectable.selected = !this.selectable.selected;
-        this.refreshable.draw();
+    undo(commandManager: CommandManager) {
+        if (this.sceneObject) {
+            this.sceneObject.selected = !this.sceneObject.selected;
+            this.sceneObject.draw();
+        }
     }
 }
 
@@ -46,18 +47,28 @@ export class MoveCursorCommand extends Command {
         super();
     }
 
-    execute(scene: Scene) {
+    execute(commandManager: CommandManager) {
+        const scene = commandManager.scene;
         scene.cursorElement.x += this.xDelta;
         scene.cursorElement.y += this.yDelta;
     }
 
-    undo(scene: Scene) {
-
+    undo(commandManager: CommandManager) {
+        const scene = commandManager.scene;
+        scene.cursorElement.x -= this.xDelta;
+        scene.cursorElement.y -= this.yDelta;
     }
 }
 
 export class UndoCommand extends Command {
     public transient = true;
-    execute(scene: Scene) {
+    execute(commandManager: CommandManager) {
+        if (commandManager.history.length > 0 && commandManager.historyPointer > -1) {
+            commandManager.history[commandManager.historyPointer].undo(commandManager);
+            commandManager.historyPointer--;
+        }
+    }
+
+    undo(commandManager: CommandManager) {
     }
 }

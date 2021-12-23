@@ -15,9 +15,10 @@ export class CommandManager {
         'l': () => new MoveCursorCommand(20, 0),
     }
 
-    private history: Array<Command> = [];
+    public history: Array<Command> = [];
+    public historyPointer = -1;
 
-    constructor(private scene: Scene) {
+    constructor(public scene: Scene) {
     }
 
     private buffer: CommandToken[] = [];
@@ -75,10 +76,12 @@ export class CommandManager {
             for (let i = 0; i < cardinality; i++) {
                 const commandInstance = commandObj();
 
-                if (!commandInstance.transient)
-                    this.history.push(commandInstance);
+                if (!commandInstance.transient) {
+                    this.historyPointer++;
+                    this.history[this.historyPointer] = commandInstance;
+                }
 
-                commandInstance.execute(this.scene);
+                commandInstance.execute(this);
             }
             this.clear();
         }

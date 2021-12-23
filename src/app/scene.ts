@@ -1,5 +1,6 @@
 ﻿import {Container, Graphics, DisplayObject} from "pixi.js";
-import {Cursor} from "./shapes/shapes";
+import {Cursor} from "./shapes/cursor";
+import {SceneObject} from "./shapes/scene-objects";
 
 
 export class Scene extends Container {
@@ -32,7 +33,7 @@ export class Scene extends Container {
         this.addChild(grid);
     }
 
-    public findSelectableShapeAtCursor(): DisplayObject {
+    public findSceneObjectAtCursor(): SceneObject {
         for (let i = this.children.length - 1; i >= 0; i--) {
             const displayObject = this.children[i];
             if (('selected' in displayObject) &&
