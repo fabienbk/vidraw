@@ -1,5 +1,5 @@
 ﻿import {Scene} from "./scene";
-import {Command, InsertCommand, MoveCursorCommand, SelectCommand, UndoCommand} from "./commands/commands";
+import {Command, InsertCommand, MoveCursorCommand, SelectCommand, UndoCommand, RedoCommand} from "./commands/commands";
 
 type CommandToken = string;
 
@@ -9,6 +9,7 @@ export class CommandManager {
         'i': () => new InsertCommand(),
         's': () => new SelectCommand(),
         'u': () => new UndoCommand(),
+        'U': () => new RedoCommand(),
         'h': () => new MoveCursorCommand(-20, 0),
         'j': () => new MoveCursorCommand(0, -20),
         'k': () => new MoveCursorCommand(0, 20),

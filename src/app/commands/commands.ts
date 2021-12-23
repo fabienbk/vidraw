@@ -72,3 +72,16 @@ export class UndoCommand extends Command {
     undo(commandManager: CommandManager) {
     }
 }
+
+export class RedoCommand extends Command {
+    public transient = true;
+    execute(commandManager: CommandManager) {
+        if (commandManager.historyPointer < commandManager.history.length - 1) {
+            commandManager.historyPointer++;
+            commandManager.history[commandManager.historyPointer].execute(commandManager);
+        }
+    }
+
+    undo(commandManager: CommandManager) {
+    }
+}
