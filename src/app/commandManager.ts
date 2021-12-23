@@ -1,18 +1,21 @@
 ﻿import {Scene} from "./scene";
-import {Command, InsertCommand, MoveCursorCommand, SelectCommand} from "./commands/commands";
+import {Command, InsertCommand, MoveCursorCommand, SelectCommand, UndoCommand} from "./commands/commands";
 
 type CommandToken = string;
 
 export class CommandManager {
 
-    private commands: {[k: string]: Command} = {
-        'i': new InsertCommand(),
-        's': new SelectCommand(),
-        'h': new MoveCursorCommand(-20, 0),
-        'j': new MoveCursorCommand(0, 20),
-        'k': new MoveCursorCommand(0, -20),
-        'l': new MoveCursorCommand(20, 0),
+    private commands: {[k: string]: () => Command} = {
+        'i': () => new InsertCommand(),
+        's': () => new SelectCommand(),
+        'u': () => new UndoCommand(),
+        'h': () => new MoveCursorCommand(-20, 0),
+        'j': () => new MoveCursorCommand(0, -20),
+        'k': () => new MoveCursorCommand(0, 20),
+        'l': () => new MoveCursorCommand(20, 0),
     }
+
+    private history: Array<Command> = [];
 
     constructor(private scene: Scene) {
     }
@@ -70,7 +73,12 @@ export class CommandManager {
         }
         else {
             for (let i = 0; i < cardinality; i++) {
-                commandObj.execute(this.scene);
+                const commandInstance = commandObj();
+
+                if (!commandInstance.transient)
+                    this.history.push(commandInstance);
+
+                commandInstance.execute(this.scene);
             }
             this.clear();
         }

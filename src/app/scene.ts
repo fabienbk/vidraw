@@ -32,9 +32,7 @@ export class Scene extends Container {
         this.addChild(grid);
     }
 
-    public findShapeAtCursor(): DisplayObject {
-        const values = this.children;
-        const res = []
+    public findSelectableShapeAtCursor(): DisplayObject {
         for (let i = this.children.length - 1; i >= 0; i--) {
             const displayObject = this.children[i];
             if (('selected' in displayObject) &&
@@ -42,7 +40,6 @@ export class Scene extends Container {
                 return displayObject;
             }
         }
-
         return null;
     }
 }
