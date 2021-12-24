@@ -1,9 +1,10 @@
 ﻿import {Graphics} from "pixi.js";
 
 export class Cursor extends Graphics {
-    constructor(public x: number,
-                public y: number) {
+    constructor(public px: number,
+                public py: number) {
         super();
+        this.position.set(px, py);
         this.draw();
     }
 

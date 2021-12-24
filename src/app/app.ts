@@ -1,14 +1,12 @@
 import * as PIXI from 'pixi.js';
 import {CommandManager} from "./commandManager";
 import {Scene} from "./scene";
-import {Box} from "./shapes/shapes";
-
 
 export class ViDrawApp {
 
-    private app: PIXI.Application;
-    private commandManager: CommandManager;
-    private scene: Scene;
+    private readonly app: PIXI.Application;
+    private readonly commandManager: CommandManager;
+    private readonly scene: Scene;
 
     constructor(parent: HTMLElement, width: number, height: number) {
         this.app = new PIXI.Application({width, height, backgroundColor : 0xFFFFFF});
