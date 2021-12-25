@@ -16,8 +16,8 @@ export class Scene extends Container {
 
         this.sortableChildren = true;
         this.cursorElement = new Cursor(
-            (this.screenWidth/2)-((this.screenWidth/2)%20),
-            (this.screenHeight/2)-((this.screenHeight/2)%20))
+            (this.screenWidth/5)-((this.screenWidth/5)%20),
+            (this.screenHeight/5)-((this.screenHeight/5)%20))
         this.cursorElement.zIndex = 99;
 
         this.addChild(this.cursorElement);
@@ -42,5 +42,9 @@ export class Scene extends Container {
             }
         }
         return null;
+    }
+
+    public allChildren(): SceneObject[] {
+        return this.children.filter(c => 'selected' in c).map(c => c as SceneObject);
     }
 }

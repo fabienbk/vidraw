@@ -1,7 +1,7 @@
 ﻿import {Graphics} from "pixi.js";
 import {DashLine} from 'pixi-dashed-line/lib/index'
 
-enum Direction {
+export enum Direction {
     North, South, East, West
 }
 
@@ -27,14 +27,32 @@ export class Arrow extends SceneObject {
     }
 
     draw() {
-        this.moveTo(this.sx, this.sy).lineTo(this.ex, this.ey);
+        this.lineStyle(2, 0x333333).beginFill(0xEEEEEE)
+            .moveTo(this.sx, this.sy)
+            .lineTo(this.ex, this.ey);
+        this.drawArrowAt(this.ex, this.ey, (this.sx-this.ex), (this.sy-this.ey));
     }
+
+    drawArrowAt(px:number, py:number, dx:number, dy:number) {
+        const cos = 0.866/5;
+        const sin = 0.500/5;
+        const end1x = (px + (dx * cos + dy * -sin));
+        const end1y = (py + (dx * sin + dy * cos));
+        const end2x = (px + (dx * cos + dy * sin));
+        const end2y = (py + (dx * -sin + dy * cos));
+        this.moveTo(px, py)
+            .lineTo(end1x, end1y)
+            .moveTo(px, py)
+            .lineTo(end2x, end2y);
+    }
+
 }
 
 export class ExtensionPoint extends SceneObject {
     constructor(public px: number,
                 public py: number,
-                public direction: Direction) {
+                public direction: Direction,
+                public parent: SceneObject) {
         super();
         this.position.set(px, py);
         this.draw();
@@ -42,39 +60,57 @@ export class ExtensionPoint extends SceneObject {
 
     draw() {
         this.clear();
-        this.lineStyle(2, 0x333333).beginFill(0xEEEEEE)
-            .drawCircle(0, 0, 10);
+        if (this.parent.selected) {
+            this.lineStyle(2, 0x333333).beginFill(0xEEEEEE)
+                .drawCircle(0, 0, 10);
 
-        switch (this.direction) {
-            case Direction.North:
-                this.moveTo(0, 5).lineTo(0, -5).lineTo(0 - 5, -2).moveTo(0, -5).lineTo(5, -2);
-                break;
-            case Direction.South:
-                this.moveTo(0, 0 - 5).lineTo(0, 5).lineTo(0 - 5, 2).moveTo(0, 5).lineTo(5, 2);
-                break;
-            case Direction.West:
-                this.moveTo(5, 0).lineTo(-5, 0).lineTo(0, 0 - 5).moveTo(-5, 0).lineTo(0, 5);
-                break;
-            case Direction.East:
-                this.moveTo(0 - 5, 0).lineTo(5, 0).lineTo(0, 0 - 5).moveTo(5, 0).lineTo(0, 5);
+            switch (this.direction) {
+                case Direction.North:
+                    this.moveTo(0, 5).lineTo(0, -5).lineTo(0 - 5, -2).moveTo(0, -5).lineTo(5, -2);
+                    break;
+                case Direction.South:
+                    this.moveTo(0, 0 - 5).lineTo(0, 5).lineTo(0 - 5, 2).moveTo(0, 5).lineTo(5, 2);
+                    break;
+                case Direction.West:
+                    this.moveTo(5, 0).lineTo(-5, 0).lineTo(0, 0 - 5).moveTo(-5, 0).lineTo(0, 5);
+                    break;
+                case Direction.East:
+                    this.moveTo(0 - 5, 0).lineTo(5, 0).lineTo(0, 0 - 5).moveTo(5, 0).lineTo(0, 5);
+            }
         }
     }
 }
 
 export class Box extends SceneObject {
+    public extendable = true;
+    private extensionPointNorth: ExtensionPoint;
+    private extensionPointSouth: ExtensionPoint;
+    private extensionPointWest: ExtensionPoint;
+    private extensionPointEast: ExtensionPoint;
     constructor(public px: number,
                 public py: number,
                 public width2: number,
-                public height2: number) {
+                public height2: number,
+                public selected: boolean) {
         super();
         this.position.set(px, py);
+        this.selected = selected;
 
-        this.addChild(new ExtensionPoint(this.width2/2, 0, Direction.North));
-        this.addChild(new ExtensionPoint(this.width2/2, this.height2, Direction.South));
-        this.addChild(new ExtensionPoint(0, this.height2/2, Direction.West));
-        this.addChild(new ExtensionPoint(this.width2, this.height2/2, Direction.East));
-
+        this.extensionPointNorth = new ExtensionPoint(this.width2/2, 0, Direction.North, this);
+        this.extensionPointSouth = new ExtensionPoint(this.width2/2, this.height2, Direction.South, this);
+        this.extensionPointWest = new ExtensionPoint(0, this.height2/2, Direction.West, this);
+        this.extensionPointEast = new ExtensionPoint(this.width2, this.height2/2, Direction.East, this);
+        this.addChild(this.extensionPointNorth, this.extensionPointWest, this.extensionPointEast, this.extensionPointSouth);
         this.draw();
+    }
+
+    getExtensionPoint(direction: Direction): ExtensionPoint {
+        switch (direction) {
+            case Direction.North: return this.extensionPointNorth;
+            case Direction.South: return this.extensionPointSouth;
+            case Direction.East: return this.extensionPointEast;
+            case Direction.West: return this.extensionPointWest;
+        }
     }
 
     draw() {
@@ -85,6 +121,7 @@ export class Box extends SceneObject {
             .drawRect(0, 0, this.width2, this.height2);
 
         if (this.selected) {
+
             const dash = new DashLine(this, {
                 dash: [5, 5],
                 width: 2,
@@ -96,6 +133,10 @@ export class Box extends SceneObject {
                 .lineTo(this.width2 + 5, this.height2 + 5)
                 .lineTo(-5, this.height2 + 5)
                 .lineTo(-5, -5);
+        }
+
+        for (const child of this.children) {
+            (child as ExtensionPoint).draw();
         }
     }
 

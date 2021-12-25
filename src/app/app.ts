@@ -17,6 +17,7 @@ export class ViDrawApp {
         this.app.stage.addChild(this.scene);
 
         document.addEventListener('keypress', (keyEvent: KeyboardEvent) => this.commandManager.sendKey(keyEvent));
+        document.addEventListener('keydown', (keyEvent: KeyboardEvent) => this.commandManager.sendKeyDown(keyEvent));
     }
 
 }

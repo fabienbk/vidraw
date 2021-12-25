@@ -1,5 +1,16 @@
 ﻿import {Scene} from "./scene";
-import {Command, InsertCommand, MoveCursorCommand, SelectCommand, UndoCommand, RedoCommand} from "./commands/commands";
+import {
+    Command,
+    ExtendShape,
+    InsertCommand,
+    MoveCursorCommand,
+    MoveSelectedCommand,
+    RedoCommand,
+    SelectAllCommand,
+    SelectCommand,
+    UndoCommand
+} from "./commands/commands";
+import {Direction} from "./shapes/scene-objects";
 
 type CommandToken = string;
 
@@ -7,13 +18,22 @@ export class CommandManager {
 
     private commands: {[k: string]: () => Command} = {
         'i': () => new InsertCommand(),
+
         's': () => new SelectCommand(),
+        'S': () => new SelectAllCommand(),
+
         'u': () => new UndoCommand(),
         'U': () => new RedoCommand(),
-        'h': () => new MoveCursorCommand(-20, 0),
-        'j': () => new MoveCursorCommand(0, -20),
-        'k': () => new MoveCursorCommand(0, 20),
-        'l': () => new MoveCursorCommand(20, 0),
+
+        'h': () => new ExtendShape(Direction.West),
+        'j': () => new ExtendShape(Direction.South),
+        'k': () => new ExtendShape(Direction.North),
+        'l': () => new ExtendShape(Direction.East),
+
+        'H': () => new MoveSelectedCommand(-20, 0),
+        'J': () => new MoveSelectedCommand(0, -20),
+        'K': () => new MoveSelectedCommand(0, 20),
+        'L': () => new MoveSelectedCommand(20, 0),
     }
 
     public history: Array<Command> = [];
@@ -26,6 +46,19 @@ export class CommandManager {
 
     clear() {
         this.buffer = [];
+    }
+
+    sendKeyDown(keyEvent: KeyboardEvent) {
+        switch(keyEvent.key) {
+            case "ArrowUp":
+                this.runCommand(new MoveCursorCommand(0, -20));break;
+            case "ArrowDown":
+                this.runCommand(new MoveCursorCommand(0, 20));break;
+            case "ArrowLeft":
+                this.runCommand(new MoveCursorCommand(-20, 0));break;
+            case "ArrowRight":
+                this.runCommand(new MoveCursorCommand(20, 0));break;
+        }
     }
 
     sendKey(keyEvent: KeyboardEvent) {
@@ -76,15 +109,18 @@ export class CommandManager {
         else {
             for (let i = 0; i < cardinality; i++) {
                 const commandInstance = commandObj();
-
-                if (!commandInstance.transient) {
-                    this.historyPointer++;
-                    this.history[this.historyPointer] = commandInstance;
-                }
-
-                commandInstance.execute(this);
+                this.runCommand(commandInstance);
             }
             this.clear();
         }
+    }
+
+    private runCommand(commandInstance: Command) {
+        if (!commandInstance.transient) {
+            this.historyPointer++;
+            this.history[this.historyPointer] = commandInstance;
+        }
+
+        commandInstance.execute(this);
     }
 }
