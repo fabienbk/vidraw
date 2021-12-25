@@ -34,8 +34,10 @@ export class Arrow extends SceneObject {
     }
 
     drawArrowAt(px:number, py:number, dx:number, dy:number) {
-        const cos = 0.866/5;
-        const sin = 0.500/5;
+        const cos = 0.866;
+        const sin = 0.500;
+        dx=10*(dx / Math.sqrt(dx*dx+dy*dy));
+        dy=10*(dy / Math.sqrt(dx*dx+dy*dy));
         const end1x = (px + (dx * cos + dy * -sin));
         const end1y = (py + (dx * sin + dy * cos));
         const end2x = (px + (dx * cos + dy * sin));
