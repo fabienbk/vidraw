@@ -30,22 +30,18 @@ export class Arrow extends SceneObject {
         this.lineStyle(2, 0x333333).beginFill(0xEEEEEE)
             .moveTo(this.sx, this.sy)
             .lineTo(this.ex, this.ey);
-        this.drawArrowAt(this.ex, this.ey, (this.sx-this.ex), (this.sy-this.ey));
+        this.drawArrowAt(this.ex, this.ey, (this.sx-this.ex), (this.sy-this.ey), 10);
     }
 
-    drawArrowAt(px:number, py:number, dx:number, dy:number) {
+    drawArrowAt(px:number, py:number, dx:number, dy:number, size: number) {
         const cos = 0.866;
         const sin = 0.500;
-        dx=10*(dx / Math.sqrt(dx*dx+dy*dy));
-        dy=10*(dy / Math.sqrt(dx*dx+dy*dy));
-        const end1x = (px + (dx * cos + dy * -sin));
-        const end1y = (py + (dx * sin + dy * cos));
-        const end2x = (px + (dx * cos + dy * sin));
-        const end2y = (py + (dx * -sin + dy * cos));
+        dx=size*(dx / Math.sqrt(dx*dx+dy*dy));
+        dy=size*(dy / Math.sqrt(dx*dx+dy*dy));
         this.moveTo(px, py)
-            .lineTo(end1x, end1y)
+            .lineTo(px + (dx * cos + dy * -sin), py + (dx * sin + dy * cos))
             .moveTo(px, py)
-            .lineTo(end2x, end2y);
+            .lineTo(px + (dx * cos + dy * sin), py + (dx * -sin + dy * cos));
     }
 
 }

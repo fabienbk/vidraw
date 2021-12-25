@@ -51,6 +51,15 @@ export class ExtendShape extends Command {
 
             const arrow = new Arrow(sx, sy, ex, ey);
             commandManager.scene.addChild(arrow);
+
+            let newShapeX, newShapeY;
+            if (this.direction == Direction.East) {newShapeX=parentObject.position.x + arrow.width + 200; newShapeY=parentObject.position.y}
+            if (this.direction == Direction.North) {newShapeX=parentObject.position.x; newShapeY=parentObject.position.y - arrow.height - 80}
+            if (this.direction == Direction.South) {newShapeX=parentObject.position.x; newShapeY=parentObject.position.y + 80 + arrow.height}
+            if (this.direction == Direction.West) {newShapeX=parentObject.position.x - arrow.width - 200; newShapeY=parentObject.position.y}
+
+            const box = new Box(newShapeX, newShapeY, 200, 80, false);
+            commandManager.scene.addChild(box);
         }
     }
 
