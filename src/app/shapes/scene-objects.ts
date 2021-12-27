@@ -1,4 +1,4 @@
-﻿import {Graphics} from "pixi.js";
+﻿import {Graphics, Text} from "pixi.js";
 import {DashLine} from 'pixi-dashed-line/lib/index'
 
 export enum Direction {
@@ -7,7 +7,7 @@ export enum Direction {
 
 export abstract class SceneObject extends Graphics {
     static idGenerator = 0;
-    public id = SceneObject.idGenerator++;
+    public oid = SceneObject.idGenerator++;
     public selected = false;
 
     protected constructor() {
@@ -27,10 +27,23 @@ export class Arrow extends SceneObject {
     }
 
     draw() {
-        this.lineStyle(2, 0x333333).beginFill(0xEEEEEE)
-            .moveTo(this.sx, this.sy)
-            .lineTo(this.ex, this.ey);
-        this.drawArrowAt(this.ex, this.ey, (this.sx-this.ex), (this.sy-this.ey), 10);
+        this.clear();
+        if (this.selected) {
+            const dash = new DashLine(this, {
+                dash: [5, 5],
+                width: 2,
+                color: 0x000000,
+            });
+            dash.moveTo(this.sx, this.sy)
+                .lineTo(this.ex, this.ey);
+        }
+        else {
+            this.lineStyle(2, 0x333333)
+                .moveTo(this.sx, this.sy)
+                .lineTo(this.ex, this.ey);
+        }
+
+        this.drawArrowAt(this.ex, this.ey, (this.sx - this.ex), (this.sy - this.ey), 10);
     }
 
     drawArrowAt(px:number, py:number, dx:number, dy:number, size: number) {
@@ -79,12 +92,33 @@ export class ExtensionPoint extends SceneObject {
     }
 }
 
+export class Label extends SceneObject{
+    private pixiText: Text;
+
+    constructor(public px: number,
+                public py: number,
+                public text: string) {
+        super()
+        this.pixiText = new Text(text,{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+        this.addChild(this.pixiText);
+    }
+
+    draw() {
+    }
+
+    onTextChange(e: Event) {
+
+    }
+}
+
 export class Box extends SceneObject {
     public extendable = true;
-    private extensionPointNorth: ExtensionPoint;
-    private extensionPointSouth: ExtensionPoint;
-    private extensionPointWest: ExtensionPoint;
-    private extensionPointEast: ExtensionPoint;
+
+    private readonly extensionPointNorth: ExtensionPoint;
+    private readonly extensionPointSouth: ExtensionPoint;
+    private readonly extensionPointWest: ExtensionPoint;
+    private readonly extensionPointEast: ExtensionPoint;
+
     constructor(public px: number,
                 public py: number,
                 public width2: number,

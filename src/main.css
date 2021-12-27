@@ -32,3 +32,7 @@ canvas {
     padding: 10px 10px 10px 10px;
     font-family: monospace;
 }
+
+#hiddenInput {
+    position: fixed;
+}

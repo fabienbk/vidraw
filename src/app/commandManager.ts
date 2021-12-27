@@ -2,22 +2,27 @@
 import {
     Command,
     ExtendShape,
-    InsertCommand,
+    InsertCommand, InsertTextCommand,
     MoveCursorCommand,
     MoveSelectedCommand,
     RedoCommand,
     SelectAllCommand,
-    SelectCommand,
+    SelectCommand, SelectNext,
     UndoCommand
 } from "./commands/commands";
 import {Direction} from "./shapes/scene-objects";
 
 type CommandToken = string;
 
+export enum InputMode {
+    Commands, TextEditing
+}
+
 export class CommandManager {
 
     private commands: {[k: string]: () => Command} = {
         'i': () => new InsertCommand(),
+        't': () => new InsertTextCommand(),
 
         's': () => new SelectCommand(),
         'S': () => new SelectAllCommand(),
@@ -38,6 +43,7 @@ export class CommandManager {
 
     public history: Array<Command> = [];
     public historyPointer = -1;
+    public inputMode = InputMode.Commands;
 
     constructor(public scene: Scene) {
     }
@@ -49,6 +55,19 @@ export class CommandManager {
     }
 
     sendKeyDown(keyEvent: KeyboardEvent) {
+        if (this.inputMode === InputMode.TextEditing) {
+            if (keyEvent.key === "Escape") {
+                this.inputMode = InputMode.Commands;
+                var textarea = document.getElementById("textarea-id");
+                this.runCommand(new InsertTextCommand());
+                textarea.remove();
+                keyEvent.preventDefault();
+            }
+            return;
+        }
+
+        let passThrough = false;
+
         switch(keyEvent.key) {
             case "ArrowUp":
                 this.runCommand(new MoveCursorCommand(0, -20));break;
@@ -58,10 +77,20 @@ export class CommandManager {
                 this.runCommand(new MoveCursorCommand(-20, 0));break;
             case "ArrowRight":
                 this.runCommand(new MoveCursorCommand(20, 0));break;
+            case "Tab":
+                this.runCommand(new SelectNext());break;
+            default:
+                passThrough = true;
         }
+
+        if (!passThrough)
+            keyEvent.preventDefault();
     }
 
     sendKey(keyEvent: KeyboardEvent) {
+        if (this.inputMode !== InputMode.Commands)
+            return;
+
         console.log(keyEvent);
         switch (keyEvent.key) {
             case 'Escape':
@@ -77,6 +106,8 @@ export class CommandManager {
             case '8':
             case '9':
                 this.buffer.push(keyEvent.key as CommandToken);break;
+            case 't':
+                keyEvent.preventDefault();
             default:
             {
                 this.buffer.push(keyEvent.key as CommandToken);

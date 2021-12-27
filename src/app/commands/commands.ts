@@ -1,5 +1,6 @@
-﻿import {Arrow, Box, Direction, SceneObject} from "../shapes/scene-objects";
-import {CommandManager} from "../commandManager";
+﻿import {Arrow, Box, Direction, Label, SceneObject} from "../shapes/scene-objects";
+import {CommandManager, InputMode} from "../commandManager";
+import {doc} from "prettier";
 
 export abstract class Command {
     public transient = false;
@@ -21,6 +22,27 @@ export class InsertCommand extends Command{
 
     undo(commandManager: CommandManager) {
         commandManager.scene.removeChild(this.newShape);
+    }
+}
+
+export class InsertTextCommand extends Command{
+    private label: Label;
+    execute(commandManager: CommandManager) {
+        commandManager.inputMode = InputMode.TextEditing;
+
+        const textArea = document.createElement("textarea");
+        textArea.setAttribute("cols", "200");
+        textArea.setAttribute("id", "textarea-id")
+        document.getElementById("hiddenInput").append(textArea);
+        textArea.focus({ preventScroll: true });
+
+        //TODO
+        //const label = new Label();
+        textArea.addEventListener('change', (e) => label.onTextChange(e));
+    }
+
+    undo(commandManager: CommandManager) {
+        commandManager.scene.removeChild(this.label);
     }
 }
 
@@ -104,6 +126,33 @@ export class SelectAllCommand extends Command {
     }
 }
 
+export class SelectNext extends Command {
+    private first: SceneObject;
+    private next: SceneObject;
+
+    execute(commandManager: CommandManager) {
+        var sceneObjects = commandManager.scene.allChildren().sort((o1, o2) => o1.oid-o2.oid);
+        this.first = sceneObjects.find(o => o.selected);
+
+        if (this.first) {
+            this.first.selected = false;
+
+            this.next = sceneObjects.find(o => o.oid > this.first.oid)
+            if (!this.next) {
+                this.next=sceneObjects[0];
+            }
+
+            this.next.selected = true;
+        }
+
+        this.first.draw();
+        this.next.draw();
+    }
+
+    undo(commandManager: CommandManager) {
+
+    }
+}
 
 export class MoveCursorCommand extends Command {
     constructor(private xDelta:number, private yDelta:number) {
