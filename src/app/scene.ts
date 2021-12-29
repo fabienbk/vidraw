@@ -1,4 +1,4 @@
-﻿import {Container, Graphics, DisplayObject} from "pixi.js";
+﻿import {Container, Graphics, DisplayObject, Text} from "pixi.js";
 import {Cursor} from "./shapes/cursor";
 import {SceneObject} from "./shapes/scene-objects";
 
@@ -44,7 +44,11 @@ export class Scene extends Container {
         return null;
     }
 
-    public allChildren(): SceneObject[] {
+    public allObjects(): SceneObject[] {
         return this.children.filter(c => 'selected' in c).map(c => c as SceneObject);
+    }
+
+    public findObjects(predicate: (o: SceneObject) => boolean): SceneObject[] {
+        return this.allObjects().filter(predicate).map(c => c as SceneObject);
     }
 }

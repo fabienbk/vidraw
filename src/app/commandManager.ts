@@ -20,6 +20,9 @@ export enum InputMode {
 
 export class CommandManager {
 
+    private readonly pressListener = (keyEvent: KeyboardEvent) => this.sendKey(keyEvent);
+    private readonly downListener = (keyEvent: KeyboardEvent) => this.sendKeyDown(keyEvent);
+
     private commands: {[k: string]: () => Command} = {
         'i': () => new InsertCommand(),
         't': () => new InsertTextCommand(),
@@ -43,9 +46,10 @@ export class CommandManager {
 
     public history: Array<Command> = [];
     public historyPointer = -1;
-    public inputMode = InputMode.Commands;
+    private inputMode = InputMode.Commands;
 
     constructor(public scene: Scene) {
+        this.setCommandMode();
     }
 
     private buffer: CommandToken[] = [];
@@ -55,16 +59,7 @@ export class CommandManager {
     }
 
     sendKeyDown(keyEvent: KeyboardEvent) {
-        if (this.inputMode === InputMode.TextEditing) {
-            if (keyEvent.key === "Escape") {
-                this.inputMode = InputMode.Commands;
-                var textarea = document.getElementById("textarea-id");
-                this.runCommand(new InsertTextCommand());
-                textarea.remove();
-                keyEvent.preventDefault();
-            }
-            return;
-        }
+
 
         let passThrough = false;
 
@@ -153,5 +148,25 @@ export class CommandManager {
         }
 
         commandInstance.execute(this);
+    }
+
+    public installKeyListeners() {
+        document.addEventListener('keypress', this.pressListener);
+        document.addEventListener('keydown', this.downListener);
+    }
+
+    public removeKeyListeners() {
+        document.removeEventListener('keypress', this.pressListener);
+        document.removeEventListener('keydown', this.downListener);
+    }
+
+    public setEditMode() {
+        this.inputMode = InputMode.TextEditing;
+        this.removeKeyListeners();
+    }
+
+    public setCommandMode() {
+        this.inputMode = InputMode.Commands;
+        this.installKeyListeners();
     }
 }

@@ -10,7 +10,7 @@ export abstract class SceneObject extends Graphics {
     public oid = SceneObject.idGenerator++;
     public selected = false;
 
-    protected constructor() {
+    protected constructor(public canContainText = false) {
         super();
     }
 
@@ -98,16 +98,18 @@ export class Label extends SceneObject{
     constructor(public px: number,
                 public py: number,
                 public text: string) {
-        super()
-        this.pixiText = new Text(text,{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-        this.addChild(this.pixiText);
+        super();
+        this.position.set(px, py);
     }
 
     draw() {
     }
 
-    onTextChange(e: Event) {
-
+    onTextChange(text: string) {
+        this.removeChildren();
+        this.pixiText = new Text(text, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+        this.addChild(this.pixiText);
+        this.draw();
     }
 }
 
@@ -124,7 +126,7 @@ export class Box extends SceneObject {
                 public width2: number,
                 public height2: number,
                 public selected: boolean) {
-        super();
+        super(true);
         this.position.set(px, py);
         this.selected = selected;
 

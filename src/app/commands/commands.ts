@@ -1,6 +1,5 @@
 ﻿import {Arrow, Box, Direction, Label, SceneObject} from "../shapes/scene-objects";
 import {CommandManager, InputMode} from "../commandManager";
-import {doc} from "prettier";
 
 export abstract class Command {
     public transient = false;
@@ -28,7 +27,7 @@ export class InsertCommand extends Command{
 export class InsertTextCommand extends Command{
     private label: Label;
     execute(commandManager: CommandManager) {
-        commandManager.inputMode = InputMode.TextEditing;
+        commandManager.setEditMode();
 
         const textArea = document.createElement("textarea");
         textArea.setAttribute("cols", "200");
@@ -36,9 +35,29 @@ export class InsertTextCommand extends Command{
         document.getElementById("hiddenInput").append(textArea);
         textArea.focus({ preventScroll: true });
 
-        //TODO
-        //const label = new Label();
-        textArea.addEventListener('change', (e) => label.onTextChange(e));
+        // Get selected object
+        var sceneObjects = commandManager.scene
+            .findObjects(o => o.selected && o.canContainText);
+
+        if (sceneObjects.length == 0) {
+            return;
+        }
+        const hostObject = sceneObjects[0];
+
+        const label = new Label(hostObject.x + 10, hostObject.y + 10, "");
+        commandManager.scene.addChild(label);
+
+        textArea.addEventListener('input', (e: Event) => {
+            label.onTextChange((e.target as HTMLTextAreaElement).value);
+        });
+        textArea.addEventListener('keydown', (keyEvent: KeyboardEvent) => {
+            if (keyEvent.key === "Escape") {
+                commandManager.setCommandMode();
+                textArea.remove();
+                keyEvent.stopPropagation();
+                keyEvent.preventDefault();
+            }
+        });
     }
 
     undo(commandManager: CommandManager) {
@@ -52,7 +71,7 @@ export class ExtendShape extends Command {
     }
 
     execute(commandManager: CommandManager) {
-        var sceneObjects = commandManager.scene.allChildren()
+        var sceneObjects = commandManager.scene.allObjects()
             .filter(o => o.selected)
             .filter(o => 'extendable' in o);
 
@@ -111,7 +130,7 @@ export class SelectCommand extends Command {
 export class SelectAllCommand extends Command {
     private sceneObjects: SceneObject[];
     execute(commandManager: CommandManager) {
-        this.sceneObjects = commandManager.scene.allChildren();
+        this.sceneObjects = commandManager.scene.allObjects();
         this.sceneObjects.forEach(o => {
             o.selected = true
             o.draw();
@@ -131,7 +150,7 @@ export class SelectNext extends Command {
     private next: SceneObject;
 
     execute(commandManager: CommandManager) {
-        var sceneObjects = commandManager.scene.allChildren().sort((o1, o2) => o1.oid-o2.oid);
+        var sceneObjects = commandManager.scene.allObjects().sort((o1, o2) => o1.oid-o2.oid);
         this.first = sceneObjects.find(o => o.selected);
 
         if (this.first) {
@@ -180,7 +199,7 @@ export class MoveSelectedCommand extends Command {
     }
 
     execute(commandManager: CommandManager) {
-        this.allSelected = commandManager.scene.allChildren().filter(c => c.selected);
+        this.allSelected = commandManager.scene.allObjects().filter(c => c.selected);
         this.allSelected.forEach(o => {
             o.position.x += this.xDelta;
             o.position.y += this.yDelta;
