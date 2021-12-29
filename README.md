@@ -10,10 +10,17 @@ Vi, but for graphics. Keyboard-first, efficient & pretty.
 ### Quick start
 **Node version >= 8.0 (recommended 10.6.0) and NPM >= 5 (recommended 6.1.0)**
 
-# install the dependencies via npm
-npm install
+install the dependencies via npm
 
-# start the server in dev mode with HMR
+```
+npm install
+```
+
+start the server in dev mode (with hot reload)
+
+```
 npm run start
 ```
+
+
 go to [http://localhost:1234](http://localhost:1234) in your browser. Done.
