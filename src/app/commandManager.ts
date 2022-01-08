@@ -86,7 +86,6 @@ export class CommandManager {
         if (this.inputMode !== InputMode.Commands)
             return;
 
-        console.log(keyEvent);
         switch (keyEvent.key) {
             case 'Escape':
                 this.clear();break;
@@ -101,12 +100,12 @@ export class CommandManager {
             case '8':
             case '9':
                 this.buffer.push(keyEvent.key as CommandToken);break;
-            case 't':
-                keyEvent.preventDefault();
             default:
             {
                 this.buffer.push(keyEvent.key as CommandToken);
                 this.interpret();
+                keyEvent.preventDefault();
+                keyEvent.stopPropagation();
                 break;
             }
         }
@@ -141,7 +140,7 @@ export class CommandManager {
         }
     }
 
-    private runCommand(commandInstance: Command) {
+    public runCommand(commandInstance: Command) {
         if (!commandInstance.transient) {
             this.historyPointer++;
             this.history[this.historyPointer] = commandInstance;

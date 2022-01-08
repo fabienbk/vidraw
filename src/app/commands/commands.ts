@@ -1,7 +1,7 @@
 ﻿import {Arrow, Box, Direction, Label, SceneObject} from "../shapes/scene-objects";
-import {CommandManager, InputMode} from "../commandManager";
+import {CommandManager} from "../commandManager";
 
-export abstract class Command {
+ export abstract class Command {
     public transient = false;
     abstract execute(commandManager: CommandManager);
     abstract undo(commandManager: CommandManager);
@@ -17,6 +17,8 @@ export class InsertCommand extends Command{
             this.newShape = box;
             scene.addChild(box);
         }
+
+        commandManager.runCommand(new InsertTextCommand());
     }
 
     undo(commandManager: CommandManager) {
@@ -47,8 +49,10 @@ export class InsertTextCommand extends Command{
         const label = new Label(hostObject.x + 10, hostObject.y + 10, "");
         commandManager.scene.addChild(label);
 
-        textArea.addEventListener('input', (e: Event) => {
-            label.onTextChange((e.target as HTMLTextAreaElement).value);
+        textArea.addEventListener('input', (keyEvent: Event) => {
+            label.onTextChange((keyEvent.target as HTMLTextAreaElement).value);
+            keyEvent.preventDefault();
+            keyEvent.stopPropagation();
         });
         textArea.addEventListener('keydown', (keyEvent: KeyboardEvent) => {
             if (keyEvent.key === "Escape") {
